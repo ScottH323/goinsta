@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ahmdrz/goinsta"
+	"github.com/ScottH323/goinsta"
 )
 
 func TestExportImport(t *testing.T) {

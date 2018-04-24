@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"encoding/json"
+	"errors"
 )
 
 type reqOptions struct {
@@ -22,7 +24,6 @@ type ErrResponse struct {
 	Status    string `json:"status"`
 	ErrorType string `json:"error_type"`
 }
-
 
 func (insta *Instagram) OptionalRequest(endpoint string, a ...interface{}) (body []byte, err error) {
 	return insta.sendRequest(&reqOptions{
@@ -106,8 +107,8 @@ func (insta *Instagram) sendRequest(o *reqOptions) (body []byte, err error) {
 	if err != nil {
 		return
 	}
-	
-	err := checkRateLimit()
+
+	err = insta.checkResponseError(resp.StatusCode, body)
 	if err != nil {
 		return nil, err
 	}
@@ -126,15 +127,16 @@ func (insta *Instagram) sendRequest(o *reqOptions) (body []byte, err error) {
 	return body, err
 }
 
-func checkRateLimit(code int, body []byte) error {
-	if code < 400 {
+//Checks if the response is successful, if not parses the error
+func (insta *Instagram) checkResponseError(code int, body []byte) error {
+	if code == 200 {
 		return nil
 	}
 
 	var errResp ErrResponse
 	err := json.Unmarshal(body, &errResp)
 	if err != nil {
-		return nil //Cant unmarshal so skip
+		return fmt.Errorf("invalid status code %s", string(body)) //Cant unmarshal so skip
 	}
 
 	return errors.New(errResp.Message)
