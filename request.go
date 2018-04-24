@@ -17,6 +17,13 @@ type reqOptions struct {
 	Query        map[string]string
 }
 
+type ErrResponse struct {
+	Message   string `json:"message"`
+	Status    string `json:"status"`
+	ErrorType string `json:"error_type"`
+}
+
+
 func (insta *Instagram) OptionalRequest(endpoint string, a ...interface{}) (body []byte, err error) {
 	return insta.sendRequest(&reqOptions{
 		Endpoint: fmt.Sprintf(endpoint, a...),
@@ -99,6 +106,11 @@ func (insta *Instagram) sendRequest(o *reqOptions) (body []byte, err error) {
 	if err != nil {
 		return
 	}
+	
+	err := checkRateLimit()
+	if err != nil {
+		return nil, err
+	}
 
 	if resp.StatusCode != 200 && !o.IgnoreStatus {
 		e := fmt.Errorf("Invalid status code %s", string(body))
@@ -112,4 +124,18 @@ func (insta *Instagram) sendRequest(o *reqOptions) (body []byte, err error) {
 	}
 
 	return body, err
+}
+
+func checkRateLimit(code int, body []byte) error {
+	if code < 400 {
+		return nil
+	}
+
+	var errResp ErrResponse
+	err := json.Unmarshal(body, &errResp)
+	if err != nil {
+		return nil //Cant unmarshal so skip
+	}
+
+	return errors.New(errResp.Message)
 }
