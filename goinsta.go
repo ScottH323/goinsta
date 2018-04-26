@@ -139,6 +139,10 @@ func (insta *Instagram) Login() error {
 		},
 	})
 	if err != nil {
+		if err == ErrRateLimit {
+			return err
+		}
+
 		return fmt.Errorf("login failed for %s error %s", insta.Informations.Username, err.Error())
 	}
 
