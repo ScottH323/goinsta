@@ -138,10 +138,16 @@ func (insta *Instagram) checkResponseError(code int, body []byte) error {
 		return ErrRateLimit
 	}
 
+	log.Printf("%v - Err: %s", code, string(body))
 	var errResp ErrResponse
 	err := json.Unmarshal(body, &errResp)
 	if err != nil {
 		return fmt.Errorf("invalid status code %s", string(body)) //Cant unmarshal so skip
+	}
+
+	switch errResp.Message { //TODO handle this better
+	case "Please wait a few minutes before you try again.":
+		return ErrRateLimit
 	}
 
 	log.Printf("%+v\n", errResp)
