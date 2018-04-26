@@ -9,7 +9,6 @@ import (
 	"strings"
 	"encoding/json"
 	"errors"
-	"log"
 )
 
 type reqOptions struct {
