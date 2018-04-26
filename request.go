@@ -9,7 +9,6 @@ import (
 	"strings"
 	"encoding/json"
 	"errors"
-	"log"
 )
 
 type reqOptions struct {
@@ -134,18 +133,14 @@ func (insta *Instagram) checkResponseError(code int, body []byte) error {
 		return nil
 	}
 
-	log.Printf("%v - Resp Error: %s", code, string(body))
+	if code == 429 {
+		return ErrRateLimit
+	}
+
 	var errResp ErrResponse
 	err := json.Unmarshal(body, &errResp)
 	if err != nil {
 		return fmt.Errorf("invalid status code %s", string(body)) //Cant unmarshal so skip
-	}
-
-	log.Printf("%+v\n", errResp)
-
-	switch errResp.ErrorType {
-	case "rate_limited":
-		return ErrRateLimit
 	}
 
 	return errors.New(errResp.Message)
