@@ -8,8 +8,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
-
-	"github.com/ScottH323/goinsta/uuid"
+	"goinsta/uuid"
 )
 
 const (
