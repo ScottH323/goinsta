@@ -3,7 +3,7 @@ package goinsta
 import (
 	"net/http"
 	"net/http/cookiejar"
-	"goinsta/response"
+	"github.com/scotth323/goinsta/response"
 )
 
 type Informations struct {
