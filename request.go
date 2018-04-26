@@ -9,6 +9,7 @@ import (
 	"strings"
 	"encoding/json"
 	"errors"
+	"log"
 )
 
 type reqOptions struct {
@@ -114,7 +115,7 @@ func (insta *Instagram) sendRequest(o *reqOptions) (body []byte, err error) {
 	}
 
 	if resp.StatusCode != 200 && !o.IgnoreStatus {
-		e := fmt.Errorf("Invalid status code %s", string(body))
+		e := fmt.Errorf("invalid status code %s", string(body))
 		switch resp.StatusCode {
 		case 400:
 			e = ErrLoggedOut
@@ -133,10 +134,16 @@ func (insta *Instagram) checkResponseError(code int, body []byte) error {
 		return nil
 	}
 
+	log.Printf("Resp Error: %s", string(body))
 	var errResp ErrResponse
 	err := json.Unmarshal(body, &errResp)
 	if err != nil {
 		return fmt.Errorf("invalid status code %s", string(body)) //Cant unmarshal so skip
+	}
+
+	switch errResp.ErrorType {
+	case "rate_limited":
+		return ErrRateLimit
 	}
 
 	return errors.New(errResp.Message)
