@@ -134,7 +134,7 @@ func (insta *Instagram) checkResponseError(code int, body []byte) error {
 		return fmt.Errorf("invalid status code %s", string(body)) //Cant unmarshal so skip
 	}
 
-	switch errResp.Status {
+	switch errResp.ErrorType {
 	case "rate_limit_error":
 		return ErrRateLimit
 	}
