@@ -9,6 +9,7 @@ import (
 	"strings"
 	"encoding/json"
 	"errors"
+	"log"
 )
 
 type reqOptions struct {
@@ -143,5 +144,6 @@ func (insta *Instagram) checkResponseError(code int, body []byte) error {
 		return fmt.Errorf("invalid status code %s", string(body)) //Cant unmarshal so skip
 	}
 
+	log.Printf("%+v\n", errResp)
 	return errors.New(errResp.Message)
 }
