@@ -134,7 +134,7 @@ func (insta *Instagram) checkResponseError(code int, body []byte) error {
 		return nil
 	}
 
-	log.Printf("Resp Error: %s", string(body))
+	log.Printf("%v - Resp Error: %s", code, string(body))
 	var errResp ErrResponse
 	err := json.Unmarshal(body, &errResp)
 	if err != nil {
