@@ -114,39 +114,29 @@ func (insta *Instagram) sendRequest(o *reqOptions) (body []byte, err error) {
 		return nil, err
 	}
 
-	if resp.StatusCode != 200 && !o.IgnoreStatus {
-		e := fmt.Errorf("invalid status code %s", string(body))
-		switch resp.StatusCode {
-		case 400:
-			e = ErrLoggedOut
-		case 404:
-			e = ErrNotFound
-		}
-		return nil, e
-	}
-
 	return body, err
 }
 
 //Checks if the response is successful, if not parses the error
 func (insta *Instagram) checkResponseError(code int, body []byte) error {
-	if code == 200 {
+
+	switch code { //Basic code flipping, anything not caught here is treated as a new errResp
+	case 200:
 		return nil
-	}
-
-	if code == 429 {
+	case 429:
 		return ErrRateLimit
+	case 404:
+		return ErrNotFound
 	}
 
-	log.Printf("%v - Err: %s", code, string(body))
 	var errResp ErrResponse
 	err := json.Unmarshal(body, &errResp)
 	if err != nil {
 		return fmt.Errorf("invalid status code %s", string(body)) //Cant unmarshal so skip
 	}
 
-	switch errResp.Message { //TODO handle this better
-	case "Please wait a few minutes before you try again.":
+	switch errResp.Status { //TODO handle this better
+	case "rate_limit_error":
 		return ErrRateLimit
 	}
 
