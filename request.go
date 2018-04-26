@@ -140,6 +140,5 @@ func (insta *Instagram) checkResponseError(code int, body []byte) error {
 		return ErrRateLimit
 	}
 
-	log.Printf("%+v\n", errResp)
 	return errors.New(errResp.Message)
 }
